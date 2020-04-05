@@ -1,4 +1,5 @@
 import robot from "robotjs";
+
 const fs = require('fs');
 const PNG = require('pngjs').PNG;
 
@@ -25,7 +26,7 @@ function getNumberOfOccurrences(color: string, arrayOfColors: string[]): number 
     return numberOfOccurrences.length;
 }
 
-function getAvarageColor(arrayOfColors: string[]): string {
+function getAverageColor(arrayOfColors: string[]): string {
     const individualColors = getIndividualColor(arrayOfColors);
     let maxOccurrences = 0;
     let commonColor = '';
@@ -34,21 +35,20 @@ function getAvarageColor(arrayOfColors: string[]): string {
             maxOccurrences = getNumberOfOccurrences(color, arrayOfColors);
             commonColor = color;
         }
-    })
+    });
     return commonColor;
 }
 
 interface Image {
     width: number;
     height: number;
-    colorAt(a: number, b: number): string
+    colorAt(x: number, y: number): Color
 }
 
-
 class ImageFromScreenshot implements Image {
-    width: number
-    height: number
-    private screen: any
+    width: number;
+    height: number;
+    private screen: any;
 
     constructor(screen: any) {
         this.width = screen.width;
@@ -56,8 +56,9 @@ class ImageFromScreenshot implements Image {
         this.screen = screen
     }
 
-    colorAt(x: number, y: number): string {
-        return this.screen.colorAt(x, y)
+    colorAt(x: number, y: number): Color {
+        const colorString = this.screen.colorAt(x, y);
+        return Color.fromString(colorString);
     }
 }
 
@@ -72,18 +73,14 @@ class ImageFromPng implements Image {
         this.png = png
     }
 
-    colorAt(col: number, row: number): string {
+    colorAt(col: number, row: number): Color {
         const colorSize = 4;
         const startIndex = row * this.width * colorSize + col * colorSize;
         const red = this.png.data[startIndex];
         const green = this.png.data[startIndex + 1];
         const blue = this.png.data[startIndex + 2];
 
-        return this.toHexString(red) + this.toHexString(green) + this.toHexString(blue);
-    }
-
-    private toHexString(byte: number): string {
-        return (byte & 0xFF).toString(16).padStart(2,'0');
+        return new Color(red, green, blue);
     }
 }
 
@@ -98,4 +95,49 @@ function fromScreenshot(posX, posY, width, height): Image {
     return new ImageFromScreenshot(screen)
 }
 
-export {readImg, fromScreenshot};
+
+class Color {
+    constructor( readonly r:number,
+                 readonly g:number,
+                 readonly b: number
+    ) {}
+
+    static fromString(colorString: string) {
+        const r = parseInt(colorString.substring(0, 2), 16);
+        const g = parseInt(colorString.substring(2, 4), 16);
+        const b = parseInt(colorString.substring(4, 6), 16);
+        return new Color(r, g, b);
+    }
+
+    isSimilar(color: Color, threshold: number) {
+        const similarity = this.getSimilarity(color);
+        return similarity < threshold;
+    }
+
+    getSimilarity(color: Color) {
+        let r = 255 - Math.abs(color.r - this.r);
+        let g = 255 - Math.abs(color.g - this.g);
+        let b = 255 - Math.abs(color.b - this.b);
+        r /= 255;
+        g /= 255;
+        b /= 255;
+
+        return 1 - ((r + g + b) / 3);
+    }
+}
+
+function getPercentageHealth(image: Image) {
+    const middleRow = 5,
+        borderWidth = 1,
+        firstColor = image.colorAt(borderWidth, middleRow);
+    let x = borderWidth + 1;
+
+    while (firstColor.isSimilar(image.colorAt(x, middleRow), 0.02)) {
+        x++;
+    }
+
+    const healthBarWidth = image.width - borderWidth * 2;
+    return Math.floor(x / healthBarWidth * 100);
+}
+
+export {readImg, fromScreenshot, getPercentageHealth, Color};
