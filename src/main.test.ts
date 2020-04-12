@@ -1,4 +1,4 @@
-import {readImg, getPercentageHealth, Color} from './main';
+import { readImg, getPercentageHealth, Color } from './main';
 
 test('colorAt() returns correct color string.', () => {
    const image = readImg('./assets/colorTest.png');
@@ -16,15 +16,14 @@ test('colorAt() returns correct color string.', () => {
 test('getPercentageColor() should return correct number', () => {
    const image = readImg('./assets/percentageTest.png');
 
-   expect(getPercentageHealth(image)).toBe(Math.floor(1160/1545 * 100));
-
+   expect(getPercentageHealth(image)).toBe(Math.floor((1160 / 1545) * 100));
 });
 
 test('isSimilar() should return correct value', () => {
    const darkRed = Color.fromString('bf4040');
    const lightRed = Color.fromString('d38585');
    const darkBlue = Color.fromString('44516c');
+
    expect(darkRed.isSimilar(lightRed, 0.25)).toBe(true);
    expect(lightRed.isSimilar(darkBlue, 0.25)).toBe(false);
-
 });
