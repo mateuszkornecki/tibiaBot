@@ -1,75 +1,36 @@
 "use strict";
+const __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : {"default": mod};
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const robot = require("robotjs");
+const robotjs_1 = __importDefault(require("robotjs"));
+const ImageFromScreenshot_1 = __importDefault(require("./ImageFromScreenshot"));
+const Color_1 = __importDefault(require("./Color"));
+exports.Color = Color_1.default;
+const ImageFromPng_1 = __importDefault(require("./ImageFromPng"));
 const fs = require('fs');
-const PNG = require('pngjs').PNG;
-function getArrayOfColors(posX, posY, width, height) {
-    const img = robot.screen.capture(posX, posY, width, height);
-    const colors = [];
-    for (let i = 0; i < img.width; i++) {
-        for (let j = 0; j < img.height; j++) {
-            const hex = img.colorAt(i, j);
-            colors.push(hex);
-        }
-    }
-    return colors;
-}
-function getInvidualColor(arrayOfColors) {
-    return [...new Set(arrayOfColors)];
-}
-function getNumberOfOccurrences(color, arrayOfColors) {
-    const numberOfOccurrences = arrayOfColors.filter(item => item === color);
-    return numberOfOccurrences.length;
-}
-function getAvarageColor(arrayOfColors) {
-    const invidualColors = getInvidualColor(arrayOfColors);
-    let maxOccurances = 0;
-    let commonColor = '';
-    invidualColors.forEach(color => {
-        if (getNumberOfOccurrences(color, arrayOfColors) > maxOccurances) {
-            maxOccurances = getNumberOfOccurrences(color, arrayOfColors);
-            commonColor = color;
-        }
-    });
-    return commonColor;
-}
-class ImageFromScreenshot {
-    constructor(screen) {
-        this.width = screen.width;
-        this.height = screen.height;
-        this.screen = screen;
-    }
-    colorAt(x, y) {
-        return this.screen.colorAt(x, y);
-    }
-}
-class ImageFromPng {
-    constructor(png) {
-        this.width = png.width;
-        this.height = png.height;
-        this.png = png;
-    }
-    colorAt(col, row) {
-        const colorSize = 4;
-        const startIndex = row * this.width * colorSize + col * colorSize;
-        const red = this.png.data[startIndex];
-        const green = this.png.data[startIndex + 1];
-        const blue = this.png.data[startIndex + 2];
-        return this.toHexString(red) + this.toHexString(green) + this.toHexString(blue);
-    }
-    toHexString(byte) {
-        return (byte & 0xFF).toString(16).padStart(2, '0');
-    }
-}
+const { PNG } = require('pngjs');
 function readImg(path) {
     const file = fs.readFileSync(path);
     const png = PNG.sync.read(file);
-    return new ImageFromPng(png);
+    return new ImageFromPng_1.default(png);
 }
 exports.readImg = readImg;
 function fromScreenshot(posX, posY, width, height) {
-    const screen = robot.screen.capture(posX, posY, width, height);
-    return new ImageFromScreenshot(screen);
+    const screen = robotjs_1.default.screen.capture(posX, posY, width, height);
+    return new ImageFromScreenshot_1.default(screen);
 }
 exports.fromScreenshot = fromScreenshot;
+function getPercentageHealth(image) {
+    const middleRow = 5;
+    const borderWidth = 1;
+    const firstColor = image.colorAt(borderWidth, middleRow);
+    let x = borderWidth + 1;
+    while (firstColor.isSimilar(image.colorAt(x, middleRow), 0.02)) {
+        x += 1;
+    }
+    const healthBarWidth = image.width - borderWidth * 2;
+    return Math.floor((x / healthBarWidth) * 100);
+}
+exports.getPercentageHealth = getPercentageHealth;
 //# sourceMappingURL=main.js.map
