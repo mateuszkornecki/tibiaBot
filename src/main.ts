@@ -1,18 +1,11 @@
-/* eslint-disable import/no-unresolved */
-/* eslint-disable import/extensions */
+
 import robot from 'robotjs';
-import ImageFromScreenshot from './ImageFromScreenshot';
+import {ImageFromScreenshot, ImageFromPng, Image} from './Image';
 import Color from './Color';
-import ImageFromPng from './ImageFromPng';
 
 const fs = require('fs');
 const { PNG } = require('pngjs');
 
-interface Image {
-   width: number;
-   height: number;
-   colorAt(x: number, y: number): Color
-}
 
 function readImg(path: String): Image {
   const file = fs.readFileSync(path);
