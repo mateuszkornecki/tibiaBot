@@ -8,44 +8,53 @@ enum Directions {
 }
 
 function getRandomNumberBetween(min, max): number {
-    return Math.round(Math.random() * (max - min)) + min;
+   return Math.round(Math.random() * (max - min)) + min;
 }
 
 function getRandomDirections(): Array<Directions> {
-    const directions = [Directions.up, Directions.down, Directions.left, Directions.right],
-        firstPosition = getRandomNumberBetween(0, directions.length - 1),
-        firstDirection = directions[firstPosition];
+   const directions = [Directions.up, Directions.down, Directions.left, Directions.right],
+       firstPosition = getRandomNumberBetween(0, directions.length - 1),
+       firstDirection = directions[firstPosition];
 
-    directions.splice(firstPosition, 1);
-    console.log(directions.length)
-    const secondDirection = directions[getRandomNumberBetween(0, directions.length - 1)];
-    return [firstDirection, secondDirection];
+   directions.splice(firstPosition, 1);
+   const secondDirection = directions[getRandomNumberBetween(0, directions.length - 1)];
+   return [firstDirection, secondDirection];
 }
 
-const antiIdle = {
-    intervalId: 0,
-    start() {
-        const randomize = () => {
-            const timeout = getRandomNumberBetween(10 * 60 * 1000, 15 * 60 * 1000),
-                directions = getRandomDirections();
+class AntiIdle {
+   antiIdleInterval = null;
 
-            robot.keyTap(directions[0], 'control');
-            robot.setKeyboardDelay(getRandomNumberBetween(0, 25))
-            robot.keyTap(directions[1], 'control');
-            robot.setKeyboardDelay(getRandomNumberBetween(0, 25))
-            robot.keyTap(directions[0], 'control');
+   start() {
+      const randomize = () => {
+         const timeout = getRandomNumberBetween(10 * 60 * 1000, 15 * 60 * 1000),
+             directions = getRandomDirections();
+         
+             this.idleTurn(directions[0], directions[1]);
+         
 
-            console.log((new Date), directions, timeout);
-            clearInterval(this.intervalId);
-            this.intervalId = setInterval(randomize, timeout);
-        }
+         clearInterval(this.antiIdleInterval);
+         this.antiIdleInterval = setInterval(randomize, timeout);
+     }
 
-        this.intervalId = setInterval(randomize, 500);
-    },
-    stop() {
-        clearInterval(this.intervalId);
-    },
+     this.antiIdleInterval = setInterval(randomize, 500);
+   };
+
+   stop() {
+      clearInterval(this.antiIdleInterval);
+  };
+
+   idleTurn(firstDirection, secondDirection) {
+      robot.keyTap(firstDirection, 'control');
+      robot.setKeyboardDelay(getRandomNumberBetween(0, 25))
+      robot.keyTap(secondDirection, 'control');
+      robot.setKeyboardDelay(getRandomNumberBetween(0, 25))
+      robot.keyTap(firstDirection, 'control');
+   };
+
 }
 
-antiIdle.start();
+const afk = new AntiIdle();
+afk.start();
+
+
 

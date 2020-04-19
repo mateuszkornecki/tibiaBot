@@ -4,7 +4,8 @@
       "test": "jest",
       "transpile": "tsc",
       "start": "ts-node ./src/main.ts",
-      "idle": "ts-node ./src/idle.ts"
+      "idle": "ts-node ./src/idle.ts",
+      "healing": "ts-node ./src/Character.ts"
    },
    "devDependencies": {
       "@types/jest": "^25.1.4",
