@@ -18,11 +18,11 @@ function fromScreenshot(posX, posY, width, height): Image {
   return new ImageFromScreenshot(screen);
 }
 
-function getPercentageHealth(image: Image) {
-  const middleRow = 5;
-  const borderWidth = 1;
-  const firstColor = image.colorAt(borderWidth, middleRow);
-  let x = borderWidth + 1;
+function getPercentageColor(image: Image) {
+   const middleRow = 5;
+   const borderWidth = 1;
+   const firstColor = image.colorAt(borderWidth, middleRow);
+   let x = borderWidth + 1;
 
   while (firstColor.isSimilar(image.colorAt(x, middleRow), 0.02)) {
     x += 1;
@@ -33,5 +33,5 @@ function getPercentageHealth(image: Image) {
 }
 
 export {
-  readImg, fromScreenshot, getPercentageHealth, Color, Image
+   readImg, fromScreenshot, getPercentageColor, Color, Image
 };
