@@ -8,4 +8,5 @@ Currently, the bot allows you to heal characters based on changes in the health 
 - Node.js
 - Typescript
 - Robot.js
+- Jest
 
